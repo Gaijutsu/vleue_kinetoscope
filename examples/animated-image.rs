@@ -27,97 +27,31 @@ impl std::fmt::Display for Image {
 }
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>, window: Query<&Window>) {
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn(Camera2dBundle {
+        camera: Camera {
+            clear_color: ClearColorConfig::None,
+            ..default()
+        },
+        ..default()
+    });
 
     let window_width = window.single().width() / 2.0;
 
-    for (i, (kind, file)) in [(Image::Gif, "cube.gif"), (Image::Webp, "cube.webp")]
-        .into_iter()
-        .enumerate()
-    {
-        commands.spawn((
-            AnimatedImageBundle {
-                animated_image: asset_server.load(file),
-                transform: Transform::from_xyz(
-                    -window_width * ((-1.0 as f32).powi(i as i32)) / 2.0,
-                    -75.0,
-                    0.0,
-                ),
-                ..default()
-            },
-            kind,
-        ));
-
-        commands
-            .spawn(NodeBundle {
-                style: Style {
-                    width: Val::Percent(50.0),
-                    height: Val::Percent(100.0),
-                    top: Val::Percent(10.0),
-                    left: Val::Percent(50.0 * (i as f32)),
-                    align_items: AlignItems::Start,
-                    justify_content: JustifyContent::Center,
-                    ..default()
-                },
-                ..default()
-            })
-            .with_children(|parent| {
-                parent.spawn((
-                    TextBundle::from_sections(vec![
-                        TextSection {
-                            value: format!("{}\n", kind),
-                            style: TextStyle {
-                                font_size: 60.0,
-                                ..default()
-                            },
-                        },
-                        TextSection {
-                            value: "play count: ".to_string(),
-                            style: TextStyle {
-                                font_size: 50.0,
-                                ..default()
-                            },
-                        },
-                        TextSection {
-                            value: "0".to_string(),
-                            style: TextStyle {
-                                font_size: 50.0,
-                                ..default()
-                            },
-                        },
-                        TextSection {
-                            value: "\ncurrent frame: ".to_string(),
-                            style: TextStyle {
-                                font_size: 30.0,
-                                ..default()
-                            },
-                        },
-                        TextSection {
-                            value: "0".to_string(),
-                            style: TextStyle {
-                                font_size: 30.0,
-                                ..default()
-                            },
-                        },
-                        TextSection {
-                            value: " / ".to_string(),
-                            style: TextStyle {
-                                font_size: 30.0,
-                                ..default()
-                            },
-                        },
-                        TextSection {
-                            value: "0".to_string(),
-                            style: TextStyle {
-                                font_size: 30.0,
-                                ..default()
-                            },
-                        },
-                    ]),
-                    kind,
-                ));
-            });
-    }
+    let mut thing = commands.spawn(SpriteBundle {
+        sprite: Sprite {
+            color: Color::BLACK,
+            custom_size: Some(Vec2::new(300.0, 200.0)),
+            ..default()
+        },
+        ..default()
+    });
+    
+    thing.with_children(|parent| {
+        parent.spawn(AnimatedImageBundle {
+            animated_image: asset_server.load("4x_om.webp"),
+            ..default()
+        },);
+    });
 }
 
 fn log_updates(

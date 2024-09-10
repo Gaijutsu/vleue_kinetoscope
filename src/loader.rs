@@ -57,7 +57,9 @@ impl AnimatedImageLoader {
             Some(ext) if ext == "webp" => {
                 #[cfg(feature = "webp")]
                 {
-                    let decoder = image::codecs::webp::WebPDecoder::new(Cursor::new(bytes))
+                    let mut decoder = image::codecs::webp::WebPDecoder::new(Cursor::new(bytes))
+                        .map_err(AnimatedImageLoaderError::DecodingError)?;
+                    decoder.set_background_color(image::Rgba([0, 0, 0, 0]))
                         .map_err(AnimatedImageLoaderError::DecodingError)?;
                     let frames = decoder.into_frames();
                     frames
