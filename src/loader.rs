@@ -162,8 +162,12 @@ impl AssetLoader for AnimatedImageLoader {
             .await
             .map_err(AnimatedImageLoaderError::IoError)?;
         let path = load_context.path().to_owned();
-        let gif = Self::internal_load(bytes, load_context, &path)?;
-        Ok(gif)
+        let anim_image = if path.extension().is_none() {
+            Self::internal_load(bytes, load_context, &path.with_extension("gif"))?
+        } else {
+            Self::internal_load(bytes, load_context, &path)?
+        };
+        Ok(anim_image)
     }
 
     fn extensions(&self) -> &[&str] {
