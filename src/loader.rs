@@ -73,7 +73,23 @@ impl AnimatedImageLoader {
                     ));
                 }
             }
-            _ => unreachable!("unsupported extension for {}", path.display()),
+            _ => {
+                #[cfg(feature = "gif")]
+                {
+                    let decoder = image::codecs::gif::GifDecoder::new(Cursor::new(bytes))
+                        .map_err(AnimatedImageLoaderError::DecodingError)?;
+                    let frames = decoder.into_frames();
+                    frames
+                        .collect_frames()
+                        .map_err(AnimatedImageLoaderError::DecodingError)?
+                }
+                #[cfg(not(feature = "gif"))]
+                {
+                    return Err(AnimatedImageLoaderError::UnsupportedExtension(
+                        "GIF".to_string(),
+                    ));
+                }
+            },
         };
 
         let mut frames = vec![];
